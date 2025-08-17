@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,44 +7,117 @@
 </head>
 <body>
 
-  <!-- <div class="wrapper">
+  <div class="wrapper">
     <video class="flex" width="765" height="430" src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" controls></video>
     <div class="speed">
       <div class="speed-bar">1×</div>
     </div>
-  </div> -->
-<div class="wrapper">
-        <div class="player">
-            <video class="viewer" width="765" height="430" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
-        
-            <div class="controls">
-                <!-- Play / Pause -->
-                <button class="player__button toggle" title="Toggle Play">►</button>
-        
-                <!-- Volume -->
-                <label>Volume
-                    <input type="range" name="volume" class="volume" min="0" max="1" step="0.05" value="1">
-                </label>
-        
-                <!-- Playback Speed -->
-                <label>Speed
-                    <input type="range" name="playbackSpeed" class="playbackSpeed" min="0.5" max="2" step="0.1" value="1">
-                </label>
-        
-                <!-- Skip buttons -->
-                <button data-skip="-10">« 10s</button>
-                <button data-skip="25">25s »</button>
-        
-                <!-- Progress bar -->
-                <div class="progress">
-                    <div class="progress__filled"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
+
 <script  src="./script.js">
   //Your code goes here
 	
 </script>
+</body>
+</html>
+ -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Custom Video Player</title>
+  <style>
+    .player { max-width: 800px; margin: 20px auto; font-family: system-ui; }
+    .controls { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+    .progress { grid-column: 1 / -1; background:#eee; height:8px; cursor:pointer; display:flex; }
+    .progress__filled { flex-basis:0%; background:#e33; }
+    .player__button { padding:6px 10px; cursor:pointer; }
+    input[type="range"] { width: 180px; }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <video
+      class="player__video"
+      width="765" height="430"
+      src="https://www.w3schools.com/html/mov_bbb.mp4">
+    </video>
+
+    <div class="controls">
+      <button class="player__button toggle" title="Toggle Play">►</button>
+
+      <label>Volume
+        <input type="range" name="volume" class="volume" min="0" max="1" step="0.05" value="1">
+      </label>
+
+      <label>Speed
+        <input type="range" name="playbackSpeed" class="playbackSpeed" min="0.5" max="2" step="0.1" value="1">
+      </label>
+
+      <button class="player__button rewind" data-skip="-10">« 10s</button>
+      <button class="player__button forward" data-skip="25">25s »</button>
+
+      <div class="progress">
+        <div class="progress__filled"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const video = document.querySelector('.player__video');
+    const toggle = document.querySelector('.player__button.toggle');
+    const volume = document.querySelector('input.volume[name="volume"]');
+    const speed = document.querySelector('input.playbackSpeed[name="playbackSpeed"]');
+    const rewindBtn = document.querySelector('.rewind');
+    const fwdBtn = document.querySelector('.forward');
+    const progress = document.querySelector('.progress');
+    const progressFilled = document.querySelector('.progress__filled');
+
+    // Play / Pause
+    function togglePlay() { video[video.paused ? 'play' : 'pause'](); }
+    function updateButton() { toggle.textContent = video.paused ? '►' : '❚ ❚'; }
+
+    // Sliders
+    function updateVolume() { video.volume = parseFloat(this.value); }
+    function updateSpeed() { video.playbackRate = parseFloat(this.value); }
+
+    // Skip
+    function skipBy(amount) {
+      video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + amount));
+    }
+
+    // Progress
+    function handleProgress() {
+      const percent = video.duration ? (video.currentTime / video.duration) * 100 : 0;
+      progressFilled.style.flexBasis = percent + '%';
+    }
+    function scrub(e) {
+      const rect = progress.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, x / rect.width));
+      video.currentTime = (video.duration || 0) * ratio;
+    }
+
+    // Events
+    toggle.addEventListener('click', togglePlay);
+    video.addEventListener('click', togglePlay);
+    video.addEventListener('play', updateButton);
+    video.addEventListener('pause', updateButton);
+    video.addEventListener('timeupdate', handleProgress);
+    video.addEventListener('loadedmetadata', handleProgress);
+
+    volume.addEventListener('input', updateVolume);
+    speed.addEventListener('input', updateSpeed);
+
+    rewindBtn.addEventListener('click', () => skipBy(-10));
+    fwdBtn.addEventListener('click', () => skipBy(25));
+
+    let isDown = false;
+    progress.addEventListener('click', scrub);
+    progress.addEventListener('mousedown', () => (isDown = true));
+    progress.addEventListener('mouseup', () => (isDown = false));
+    progress.addEventListener('mousemove', (e) => isDown && scrub(e));
+  </script>
 </body>
 </html>
